@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -21,19 +21,18 @@ const styles = {
     paddingLeft: '30px'
   }
 };
-class MenuBar extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-  // this method sets the current state of a menu item i.e whether it is in expanded or collapsed or a collapsed state
-  handleClick(item) {
-    this.setState((prevState) => ({ [item]: !prevState[item] }));
-  }
-  // if the menu item doesn't have any child, this method simply returns a clickable menu item that redirects to any location and if there is no child this method uses recursion to go until the last level of children and then returns the item by the first condition.
-  handler(children) {
-    const { classes } = this.props;
-    const { state } = this;
+
+const MenuBar = (props) => {
+  const [item, setItem] = useState(menuItems);
+
+  const handleClick = (item) => {
+    setItem(() => !item);
+    // console.log(!item);
+  };
+
+  const handler = (children) => {
+    const { classes } = props;
+    console.log(classes);
     return children.map((subOption) => {
       if (!subOption.children) {
         return (
@@ -45,45 +44,46 @@ class MenuBar extends Component {
             </ListItem>
           </div>
         );
-      }
-      return (
-        <div key={subOption.name}>
-          <ListItem button onClick={() => this.handleClick(subOption.name)}>
-            <ListItemText inset primary={subOption.name} />
-            {state[subOption.name] ? <ExpandLess /> : <ExpandMore />}
-          </ListItem>
-          <Collapse in={state[subOption.name]} timeout="auto" unmountOnExit>
-            {this.handler(subOption.children)}
-          </Collapse>
-        </div>
-      );
-    });
-  }
-  render() {
-    const { classes, drawerOpen, menuOptions } = this.props;
-    return (
-      <div className={classes.list}>
-        <Drawer
-          variant="persistent"
-          anchor="left"
-          open
-          classes={{ paper: classes.list }}
-        >
-          <div>
-            <List>
-              <ListItem key="menuHeading" divider disableGutters>
-                <ListItemText
-                  className={classes.menuHeader}
-                  inset
-                  primary="Menu"
-                />
-              </ListItem>
-              {this.handler(menuItems.data)}
-            </List>
+      } else {
+        return (
+          <div key={subOption.name}>
+            <ListItem button onClick={() => handleClick(subOption.name)}>
+              <ListItemText inset primary={subOption.name} />
+              {[subOption.name] ? <ExpandLess /> : <ExpandMore />}
+            </ListItem>
+            <Collapse name={[subOption.name]} timeout="auto" unmountOnExit>
+              {handler(subOption.children)}
+            </Collapse>
           </div>
-        </Drawer>
-      </div>
-    );
-  }
-}
+        );
+      }
+    });
+  };
+
+  const { classes, drawerOpen, menuOptions } = props;
+  return (
+    <div className={classes.list}>
+      <Drawer
+        variant="persistent"
+        anchor="left"
+        open
+        classes={{ paper: classes.list }}
+      >
+        <div>
+          <List>
+            <ListItem key="menuHeading" divider disableGutters>
+              <ListItemText
+                className={classes.menuHeader}
+                inset
+                primary="Menu"
+              />
+            </ListItem>
+            {handler(menuItems.data)}
+          </List>
+        </div>
+      </Drawer>
+    </div>
+  );
+};
+
 export default withStyles(styles)(MenuBar);
