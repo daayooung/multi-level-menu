@@ -22,41 +22,44 @@ const styles = {
   }
 };
 
-const MenuBar = (props) => {
-  const [item, setItem] = useState(menuItems);
+const menuChildren = menuItems.data.map((a) => a.children);
 
-  const handleClick = (item) => {
-    setItem(() => !item);
-    // console.log(!item);
+const MenuBar = (props) => {
+  const [hasChildren, setHasChildren] = useState(null);
+  console.log(menuChildren);
+
+  const handleClick = () => {
+    setHasChildren(() => !hasChildren);
   };
 
   const handler = (children) => {
     const { classes } = props;
+    console.log(children);
     console.log(classes);
-    return children.map((subOption) => {
-      if (!subOption.children) {
+    return children.map((data) => {
+      if (!data.children) {
         return (
-          <div key={subOption.name}>
-            <ListItem button key={subOption.name}>
-              <Link to={subOption.url} className={classes.links}>
-                <ListItemText inset primary={subOption.name} />
+          <div key={data.name}>
+            <ListItem button key={data.name}>
+              <Link to={data.url} className={classes.links}>
+                <ListItemText inset primary={data.name} />
               </Link>
             </ListItem>
           </div>
         );
-      } else {
-        return (
-          <div key={subOption.name}>
-            <ListItem button onClick={() => handleClick(subOption.name)}>
-              <ListItemText inset primary={subOption.name} />
-              {[subOption.name] ? <ExpandLess /> : <ExpandMore />}
-            </ListItem>
-            <Collapse name={[subOption.name]} timeout="auto" unmountOnExit>
-              {handler(subOption.children)}
-            </Collapse>
-          </div>
-        );
       }
+
+      return (
+        <div key={data.name}>
+          <ListItem button onClick={() => handleClick(data.name)}>
+            <ListItemText inset primary={data.name} />
+            {[data.children] ? <ExpandLess /> : <ExpandMore />}
+          </ListItem>
+          <Collapse in={hasChildren} timeout="auto" unmountOnExit>
+            {handler(data.children)}
+          </Collapse>
+        </div>
+      );
     });
   };
 
